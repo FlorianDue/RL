@@ -109,6 +109,9 @@ class OAAP(gym.Env):
             if(np.min(self.state_capacity) < 0):
                 self.recent_reward = -self.penalty_reward
                 self.total_reward -= self.penalty_reward
+                for i in range(len(self.state_capacity[0])):
+                    if(self.state_capacity[0][i] < 0):
+                        self.state_capacity[0][i] = 0
             else:
                 self.recent_reward = self.total_reward_per_requ[self.current_step]
                 self.total_reward += self.total_reward_per_requ[self.current_step]

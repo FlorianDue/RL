@@ -26,8 +26,10 @@ class neural_network(nn.Module):
         self.fc2 = nn. Linear(fc1_dims, fc2_dims)
         #second dropout layer
         self.dropout2 = nn.Dropout(p=dropout)
-        #output layer
+        #output stream to compute the advantage function
         self.Q = nn.Linear(fc2_dims, n_actions)
+        #output stream to compute the state-value function
+        self.V=nn.Linear(fc2_dims, 1)
 
 
         self.optimizer = optim.RMSprop(self.parameters(), lr = lr)
@@ -41,8 +43,6 @@ class neural_network(nn.Module):
         x=F.relu(self.fc2(x))
         #x=F.relu(self.fc3(x))
         return self.Q(x)
-        
-          
 
     def save_params(self):
         T.save(self.state_dict(), self.path)

@@ -35,7 +35,7 @@ class Replay_Buffer():
         else:    
             self.mem_counter +=1
 
-    def sample_data(self, model):
+    def sample_data(self):
         max_mem = self.max_mem_size if self.replace == True else self.mem_counter
         batch = np.random.choice(max_mem, self.batch_size, replace = False)
         return  T.tensor(self.state_memory[batch]).to(T.long), \
@@ -43,5 +43,14 @@ class Replay_Buffer():
                 T.tensor(self.reward_memory[batch]).to(T.long),\
                 T.tensor(self.new_state_memory[batch]).to(T.long),\
                 T.tensor(self.terminal_memory[batch]).to(T.long)
-         
+
+    def reset_memory(self, input_dims, batch_size):
+        self.state_memory = np.zeros((self.max_mem_size, input_dims), dtype = np.float32)
+        self.new_state_memory = np.zeros((self.max_mem_size, input_dims), dtype = np.float32)
+        self.action_memory = np.zeros(self.max_mem_size, dtype = np.float32)
+        self.reward_memory = np.zeros(self.max_mem_size, dtype = np.float32)
+        self.terminal_memory = np.zeros(self.max_mem_size, dtype = np.float32)  
+        self.replace = False
+        self.mem_counter = 0      
+        self.batch_size = batch_size
 

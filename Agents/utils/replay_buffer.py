@@ -19,7 +19,7 @@ class Replay_Buffer():
         #received reward
         self.reward_memory = np.zeros(self.max_mem_size, dtype = np.float32)
         #store information if the sample was the last sample of an episode
-        self.terminal_memory = np.zeros(self.max_mem_size, dtype = np.float32)
+        self.terminal_memory = np.zeros(self.max_mem_size, dtype = np.bool_)
 
     def store_transition(self, state, action, new_state, reward, done):
         self.state_memory[self.mem_counter] = state
@@ -35,21 +35,21 @@ class Replay_Buffer():
         else:    
             self.mem_counter +=1
 
-    def sample_data(self):
-        max_mem = self.max_mem_size if self.replace == True else self.mem_counter
+    def sample_data(self, current_model):
+        max_mem = min(self.mem_counter, self.max_mem_size) 
         batch = np.random.choice(max_mem, self.batch_size, replace = False)
-        return  T.tensor(self.state_memory[batch]).to(T.long), \
-                T.tensor(self.action_memory[batch]).to(T.long),\
-                T.tensor(self.reward_memory[batch]).to(T.long),\
-                T.tensor(self.new_state_memory[batch]).to(T.long),\
-                T.tensor(self.terminal_memory[batch]).to(T.long)
+        return  T.tensor(self.state_memory[batch]).to(current_model.device), \
+                T.tensor(self.action_memory[batch]).to(current_model.device),\
+                T.tensor(self.reward_memory[batch]).to(current_model.device),\
+                T.tensor(self.new_state_memory[batch]).to(current_model.device),\
+                T.tensor(self.terminal_memory[batch]).to(current_model.device)
 
     def reset_memory(self, input_dims, batch_size):
         self.state_memory = np.zeros((self.max_mem_size, input_dims), dtype = np.float32)
         self.new_state_memory = np.zeros((self.max_mem_size, input_dims), dtype = np.float32)
         self.action_memory = np.zeros(self.max_mem_size, dtype = np.float32)
         self.reward_memory = np.zeros(self.max_mem_size, dtype = np.float32)
-        self.terminal_memory = np.zeros(self.max_mem_size, dtype = np.float32)  
+        self.terminal_memory = np.zeros(self.max_mem_size, dtype = np.bool_)  
         self.replace = False
         self.mem_counter = 0      
         self.batch_size = batch_size

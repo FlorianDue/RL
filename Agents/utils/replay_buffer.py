@@ -29,7 +29,7 @@ class Replay_Buffer():
         self.terminal_memory[self.mem_counter] = done
         #if the max size of the buffer is reached,\
         # new samples will replace the oldest samples
-        if(self.max_mem_size == self.mem_counter):
+        if(self.max_mem_size == self.mem_counter-1):
             self.mem_counter = 0
             self.replace = True
         else:    

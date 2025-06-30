@@ -6,9 +6,9 @@ class OAAP(gym.Env):
 
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, episode_length, production_lines, nbr_resources_per_line, resource_capacity, min_rev, max_rev, order_set, action_space, penalty_reward):
+    def __init__(self, episode_length, production_lines, nbr_resources_per_line, resource_capacity, min_rev, max_rev, order_set, action_space, penalty_reward, len_static_data = 10):
         
-        super(OAAP, self)
+        super(OAAP, self).__init__()
         
         self.episode_length = episode_length
         self.production_lines = production_lines
@@ -19,6 +19,7 @@ class OAAP(gym.Env):
         self.action_space = action_space
         self.penalty_reward = penalty_reward
         self.current_step = None
+        self.len_static_data = len_static_data
 
         if order_set:
             self.order_set = order_set
@@ -59,7 +60,7 @@ class OAAP(gym.Env):
         print(self.requests)
         print("self.requests")
 
-    def reset_env(self):           
+    def reset_env(self, static = False, static_orders= None, static_rewards = False):           
         self.current_step = 0
         self.recent_reward = 0
         self.total_reward = 0
@@ -75,13 +76,17 @@ class OAAP(gym.Env):
         self.request_type = np.random.randint(0, len(self.order_set), self.episode_length, int)
         self.request_reward_per_capa = np.random.randint(self.min_rev, self.max_rev+1, self.episode_length, int)
         self.total_reward_per_requ = np.zeros(self.episode_length, int)
-        #currently not possible to resditribute the required capacity between resources
-        for i in range(0, self.episode_length):
-            self.requests[i] = self.order_set[self.request_type[i]]
-            req_capa = 0
-            for j in range(len(self.requests[i])):
-                req_capa += self.requests[i][j]   
-            self.total_reward_per_requ[i] = req_capa * self.request_reward_per_capa[i]
+        if static:
+            self.requests = static_orders
+            self.total_reward_per_requ = static_rewards
+        else:
+            #currently not possible to resditribute the required capacity between resources
+            for i in range(0, self.episode_length):
+                self.requests[i] = self.order_set[self.request_type[i]]
+                req_capa = 0
+                for j in range(len(self.requests[i])):
+                    req_capa += self.requests[i][j]   
+                self.total_reward_per_requ[i] = req_capa * self.request_reward_per_capa[i]
         return self.observe()    
 
     def observe(self):
@@ -98,7 +103,7 @@ class OAAP(gym.Env):
     
     def step(self, action):
         #if the action is the last in the action action space, the order is decline
-        if(action == len(self.action_space)-1 ):
+        if(action == 0):
             self.recent_reward = 0
             self.declined +=1
             self.total_lost_reward += self.total_reward_per_requ[self.current_step]
@@ -121,4 +126,23 @@ class OAAP(gym.Env):
             self.observe_final_step()
         else:
             self.observe()
-        return self.observation, self.recent_reward, self.done        
+        return self.observation, self.recent_reward, self.done, ''
+
+    def create_static_data(self):
+        test_data = np.zeros(
+            (self.len_static_data, self.episode_length, self.resource_capacity), int)
+        request_test = np.zeros(
+            (self.episode_length, self.resource_capacity), int)
+        test_reward = np.zeros(
+            (self.len_static_data, self.episode_length), int)
+        for j in range(self.len_static_data):
+            reward_per_test_unit = np.random.randint(self.min_rev,
+                                                          self.max_rev+1, self.episode_length, int)
+            test_data_request = np.random.randint(0,
+                                                       len(self.order_set), self.episode_length, int)
+            for i in range(0, self.episode_length):
+                request_test[i] = self.order_set[test_data_request[i]]
+                # print(self.request_test.shape)
+            test_reward[j] = np.sum(request_test, axis=1)*reward_per_test_unit
+            test_data[j] = np.copy(request_test)
+        return test_data, test_reward

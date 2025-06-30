@@ -29,14 +29,14 @@ class Replay_Buffer():
         self.terminal_memory[self.mem_counter] = done
         #if the max size of the buffer is reached,\
         # new samples will replace the oldest samples
-        if(self.max_mem_size == self.mem_counter-1):
+        if((self.max_mem_size-1) == self.mem_counter):
             self.mem_counter = 0
             self.replace = True
         else:    
             self.mem_counter +=1
 
     def sample_data(self, current_model):
-        max_mem = min(self.mem_counter, self.max_mem_size) 
+        max_mem = min(self.mem_counter, (self.max_mem_size-1)) if self.replace == False else (self.max_mem_size-1) 
         batch = np.random.choice(max_mem, self.batch_size, replace = False)
         return  T.tensor(self.state_memory[batch]).to(current_model.device), \
                 T.tensor(self.action_memory[batch]).to(current_model.device),\

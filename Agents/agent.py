@@ -1,5 +1,7 @@
 import numpy as np
 import torch as T
+import torch.nn as nn
+import torch.nn.functional as F
 import matplotlib.pyplot as plt
          
 class train_agent():
@@ -49,7 +51,7 @@ class train_agent():
                     while not done:
                         action = self.action.choose_action(observation, self.epsilon.epsilon)
                         #print(observation)
-                        observation_, reward, done = environment.step(action)
+                        observation_, reward, done, _ = environment.step(action)
                         if print_results:
                             self.score += reward
                         self.memory.store_transition(observation, action, observation_, reward, done)
@@ -65,17 +67,18 @@ class train_agent():
                                 
                 if print_results: 
                     #x = np.linspace(1, len(self.scores), len(self.scores))
-                    #x = np.linspace(1, len(self.average_score), len(self.average_score))
-                    #plt.figure(figsize=(30,15))
+                    x = np.linspace(1, len(self.average_score), len(self.average_score))
+                    plt.figure(figsize=(30,15))
                     #plt.plot(x, self.scores, color = 'blue', linewidth =1, label = 'Overall_reward')
-                    #plt.plot(x, self.average_score, color = 'blue', linewidth =1, label = 'Average reward 50')
+                    plt.plot(x, self.average_score, color = 'blue', linewidth =1, label = 'Average reward 50')
 
-                    #plt.xlabel('Games')
-                    #plt.ylabel('Reward')
-                    #plt.legend()
+                    plt.xlabel('Games')
+                    plt.ylabel('Reward')
+                    plt.legend()
+                    plt.grid(True)
                     #plt.savefig("Scores_512.pdf", format="pdf")
                     # %% 
-                    #plt.show()   
+                    plt.show()   
                     return self.average_score
         else:
             print("Missing Network! Hand network over wirh train_agent.set_networks")               
@@ -122,4 +125,31 @@ class action_selection_dueling_q_learning():
                     action = np.random.choice(self.action_space)
                 return action    
         else:
-            print("Missing Network! Hand network over wirh train_agent.set_networks")                                   
+            print("Missing Network! Hand network over with train_agent.set_networks")          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

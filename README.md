@@ -2,6 +2,10 @@
 Small Library for RL
 
 
+## Python
+
+    Python Version 3.12.3
+
 ## Dependencies
 
 ```
